@@ -7,7 +7,7 @@ from ddgs import DDGS
 import trafilatura
 import requests
 from dotenv import load_dotenv
-
+# had some issues in .venv configurations so fixed that with this line below
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = FastAPI()
@@ -77,15 +77,28 @@ def conversation(body: SearchRequest):
     return {"status": "ok"}
 
 
-# To install: pip install tavily-python
+
+
+# Here is the below Code i wrote for when we want searching and getting resources
+# from the Tavily Playground
+
 from tavily import TavilyClient
 client = TavilyClient(os.getenv("TAVILY_API_KEY"))
 
 @app.post("/conversation_tavily")
 def conversation_tavily(body: SearchRequest):
+    
     main_query = body.query
     response = client.search(
-        query=main_query,
-        search_depth="advanced"
-    )
+    query=main_query,
+    search_depth="advanced"
+    )    
     return response
+
+
+# /signin endpoint for logging in
+# /signup endpoint for registering user
+# Authentication will be done in above using supabase auth
+
+
+# /dashboard endpoint for showing dashboard
