@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 import random
 import os
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,10 +7,20 @@ from ddgs import DDGS
 import trafilatura
 import requests
 from dotenv import load_dotenv
+import uuid
+from sqlalchemy.orm import Session                                      
+from database import get_db, init_db, Conversation 
+
+
+
 # had some issues in .venv configurations so fixed that with this line below
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = FastAPI()
+
+@app.on_event("startup")
+def startup():
+    init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,8 +55,12 @@ def home():
 
 
 @app.post("/conversation")
-def conversation(body: SearchRequest):
+def conversation(body: SearchRequest, db: Session = Depends(get_db)):
     query = body.query
+
+    record = Conversation(id=str(uuid.uuid4()), query=query)
+    db.add(record)
+    db.commit()
 
     print(f"\n{'='*50}")
     print(f"Query: {query}")
@@ -86,13 +100,18 @@ from tavily import TavilyClient
 client = TavilyClient(os.getenv("TAVILY_API_KEY"))
 
 @app.post("/conversation_tavily")
-def conversation_tavily(body: SearchRequest):
-    
+def conversation_tavily(body: SearchRequest, dbs: Session = Depends(get_db)):
     main_query = body.query
+
+    records = Conversation(id=str(uuid.uuid4()), query=main_query)     
+    dbs.add(records)
+    dbs.commit()           
+    
     response = client.search(
     query=main_query,
     search_depth="advanced"
     )    
+    
     return response
 
 
@@ -102,7 +121,4 @@ def conversation_tavily(body: SearchRequest):
 
 
 # /dashboard endpoint for showing dashboard
-
-
-#*99x7gFFL.z@kd2
 
