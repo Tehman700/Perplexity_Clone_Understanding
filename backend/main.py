@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import uuid
 from sqlalchemy.orm import Session                                      
 from database import get_db, init_db, Conversation 
+from datetime import datetime, timezone
 
 
 
@@ -103,7 +104,9 @@ client = TavilyClient(os.getenv("TAVILY_API_KEY"))
 def conversation_tavily(body: SearchRequest, dbs: Session = Depends(get_db)):
     main_query = body.query
 
-    records = Conversation(id=str(uuid.uuid4()), query=main_query)     
+    # records = Conversation(id=str(uuid.uuid4()), slug="tehmantesting", query=main_query, user_id="1")
+    # Just added this line for testing the API endpoint repeatedly
+    records = Conversation(id="1", slug="testing", query=main_query, user_id="1", created_at=datetime.now(timezone.utc))
     dbs.add(records)
     dbs.commit()           
     
@@ -116,6 +119,10 @@ def conversation_tavily(body: SearchRequest, dbs: Session = Depends(get_db)):
 
 
 # /signin endpoint for logging in
+# @app.post("signin")
+# def signin(body)
+
+
 # /signup endpoint for registering user
 # Authentication will be done in above using supabase auth
 
