@@ -58,8 +58,11 @@ def home():
 @app.post("/conversation")
 def conversation(body: SearchRequest, db: Session = Depends(get_db)):
     query = body.query
+    
+    
+    record = Conversation(id="1", slug="testing", query=query, user_id="1", created_at=datetime.now(timezone.utc))
 
-    record = Conversation(id=str(uuid.uuid4()), query=query)
+    #record = Conversation(id=str(uuid.uuid4()), query=query)
     db.add(record)
     db.commit()
 
